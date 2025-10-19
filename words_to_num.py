@@ -69,71 +69,237 @@
 #3  Create encoder and decoder function as dictinaris
 #4 create a tokenization scheme
 # see the result
+# Example of tokenization code
+# 1. Split a sentence into lower case words
+# 2. Create a vocab from unique words (tokens)
+# 3. Create encoder and decoder functions as dictionaries
+# 4. Create a tokenization scheme
+# 5. See the results
 
-
-text=["All that we are is the result of what we thought,"
-      "To be or not to be that is the question",
-      "Be yourself everyone else is already taken"
-      ]
-print(text)
-
-#seperate into word by spletting by spaces
 import re
-re.split('\s',text[0])
-#can recobine into text
-''.join(re.split('\s',text[0]))
+import numpy as np
+import matplotlib.pyplot as plt
 
-# also make lower-case
-allwords = re.split('\s',' '.join(text).lower())
+# Sample text data
+text = ["All that we are is the result of what we thought",
+        "To be or not to be that is the question",
+        "Be yourself everyone else is already taken"]
+
+print("Original texts:")
+for i, t in enumerate(text):
+    print(f"  {i + 1}. {t}")
+print()
+
+# Separate into words by splitting by spaces
+print("Example of splitting first sentence:")
+print(re.split('\s', text[0]))
+
+# Can recombine into text
+print("\nRecombined text:")
+print(' '.join(re.split('\s', text[0])))
+
+# Also make lower-case and split all texts
+allwords = re.split('\s', ' '.join(text).lower())
+print("\nAll words (lower case):")
 print(allwords)
+print()
 
+# ============================================
+# Create a vocabulary (lexicon)
+# ============================================
 
-#Create a vocabulary (lexicon)
-
-# find the unique words
+# Find the unique words
 vocab = sorted(set(allwords))
+print(f"Vocabulary ({len(vocab)} unique words):")
 print(vocab)
+print()
 
+# ============================================
+# Create an encoder and decoder
+# ============================================
 
-#Create an encoder and decoder
-
-# the encoder is a python dictionary type
+# The encoder is a python dictionary type
 word2idx = {}
 for i, word in enumerate(vocab):
     word2idx[word] = i
-word2idx
 
-# and a decoder
+print("Word to Index mapping (first 5):")
+for word, idx in list(word2idx.items())[:5]:
+    print(f"  '{word}' -> {idx}")
+
+# And a decoder
 idx2word = {}
 for i, word in enumerate(vocab):
     idx2word[i] = word
-idx2word
 
-print(f'The word "to" has index {word2idx["to"]}')
-print(f'The index "7" maps to the word "{idx2word[7]}"')
+print("\nIndex to Word mapping (first 5):")
+for idx, word in list(idx2word.items())[:5]:
+    print(f"  {idx} -> '{word}'")
 
+print(f'\nExample lookups:')
+print(f'  The word "to" has index {word2idx["to"]}')
+print(f'  The index "7" maps to the word "{idx2word[7]}"')
+print()
 
-#Make fake quotes, just for fun :P
+# ============================================
+# Make fake quotes, just for fun :P
+# ============================================
 
-
-# select random words from the dictionary
-import numpy as np
-
+# Select random words from the dictionary
+np.random.seed(42)  # For reproducibility
 randidx = np.random.randint(0, len(vocab), size=5)
 
-# words of wisdom as a list of tokens
-[idx2word[i] for i in randidx]
+# Words of wisdom as a list of tokens
+random_words = [idx2word[i] for i in randidx]
+print("Random words as list:", random_words)
 
-# does it sound more wise as text??
-' '.join([idx2word[i] for i in randidx])
+# Does it sound more wise as text??
+random_sentence = ' '.join([idx2word[i] for i in randidx])
+print(f'Random "wisdom": "{random_sentence}"')
+print()
 
+# ============================================
+# A peek at tokenization
+# ============================================
 
-#A peak at tokenization
-
-# translate the text into numbers
+# Translate the text into numbers
 text_as_int = [word2idx[word] for word in allwords]
-text_as_int
+print("First 10 tokens as integers:")
+print(text_as_int[:10])
+print()
 
-# and numbers back into text
-for tokeni in text_as_int:
-    print(f'Token {tokeni:2}: {idx2word[tokeni]}')
+# And numbers back into text
+print("First 10 tokens decoded:")
+for tokeni in text_as_int[:10]:
+    print(f'  Token {tokeni:2}: "{idx2word[tokeni]}"')
+print()
+
+
+# ============================================
+# Exercise 2: Wrap the encoder/decoder into functions
+# ============================================
+
+### The encoder function
+def encoder(text, word2idx):
+    """Convert text string to list of token IDs"""
+    # Parse the text into words (split and lowercase)
+    words = re.split('\s', text.lower())
+
+    # Return the vector of indices
+    # Handle unknown words with a default index (-1)
+    return [word2idx.get(word, -1) for word in words if word]  # Skip empty strings
+
+
+### Now for the decoder
+def decoder(indices, idx2word):
+    """Convert list of token IDs back to text"""
+    # Find the words for these indices, and join into one string
+    # Handle unknown indices with <UNK> token
+    return ' '.join([idx2word.get(idx, '<UNK>') for idx in indices])
+
+
+# Reminder of the available words
+print("=" * 50)
+print("Exercise 2: Encoder/Decoder Functions")
+print("=" * 50)
+print(f"Available vocabulary ({len(vocab)} words):")
+print(vocab)
+print()
+
+# Create a new sentence using the vocab
+newtext = 'we already are the result of what everyone else already thought'
+
+# Encode and decode the new text
+newtext_tokenIDs = encoder(newtext, word2idx)
+decoded_text = decoder(newtext_tokenIDs, idx2word)
+
+print('Original text:')
+print(f'\t{newtext}')
+
+print(f'\nToken IDs:')
+print(f'\t{newtext_tokenIDs}')
+
+print(f'\nDecoded text:')
+print(f'\t{decoded_text}')
+print()
+
+# ============================================
+# Exercise 3: Visualize the tokens
+# ============================================
+
+print("=" * 50)
+print("Exercise 3: Token Visualization")
+print("=" * 50)
+
+# Get all the text and all the tokens
+alltext = ' '.join(vocab)
+tokens = encoder(alltext, word2idx)
+
+# Create a figure
+fig, ax = plt.subplots(1, figsize=(14, 6))
+
+# Plot the tokens
+ax.plot(range(len(tokens)), tokens, 'ks', markersize=12, markerfacecolor=[.7, .7, .9])
+ax.set(xlabel='Word Position', ylabel='Token ID',
+       title='Vocabulary Token IDs')
+ax.grid(linestyle='--', axis='y', alpha=0.3)
+
+# Invisible axis for right-hand-side labels
+ax2 = ax.twinx()
+ax2.plot(tokens, alpha=0)
+ax2.set(yticks=range(len(vocab)), yticklabels=vocab)
+ax2.set_ylabel('Word', rotation=270, labelpad=20)
+
+# Add some word labels on the plot for clarity
+for i, (token, word) in enumerate(zip(tokens[:10], vocab[:10])):
+    ax.annotate(word, (i, token), textcoords="offset points",
+                xytext=(0, 10), ha='center', fontsize=8, rotation=45)
+
+plt.tight_layout()
+plt.show()
+
+# Additional visualization: Token distribution in original texts
+fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(14, 8))
+
+# Tokenize each original sentence
+for i, sentence in enumerate(text):
+    sentence_tokens = encoder(sentence, word2idx)
+    ax3.plot(sentence_tokens, 'o-', label=f'Text {i + 1}', alpha=0.7, linewidth=2)
+
+ax3.set(xlabel='Word Position in Sentence', ylabel='Token ID',
+        title='Token IDs for Original Sentences')
+ax3.legend()
+ax3.grid(True, alpha=0.3)
+
+# Word frequency histogram
+word_counts = {}
+for word in allwords:
+    word_counts[word] = word_counts.get(word, 0) + 1
+
+sorted_words = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+words_plot = [w[0] for w in sorted_words]
+counts_plot = [w[1] for w in sorted_words]
+
+bars = ax4.bar(range(len(words_plot)), counts_plot, color='steelblue', alpha=0.7)
+ax4.set(xlabel='Word', ylabel='Frequency',
+        title='Top 10 Most Frequent Words')
+ax4.set_xticks(range(len(words_plot)))
+ax4.set_xticklabels(words_plot, rotation=45, ha='right')
+
+# Add count values on bars
+for bar, count in zip(bars, counts_plot):
+    height = bar.get_height()
+    ax4.text(bar.get_x() + bar.get_width() / 2., height,
+             f'{count}', ha='center', va='bottom')
+
+plt.tight_layout()
+plt.show()
+
+# Summary statistics
+print("\n" + "=" * 50)
+print("Summary Statistics")
+print("=" * 50)
+print(f"Total words processed: {len(allwords)}")
+print(f"Unique words (vocab size): {len(vocab)}")
+print(f"Most common word: '{sorted_words[0][0]}' (appears {sorted_words[0][1]} times)")
+print(f"Vocabulary coverage: {len(vocab) / len(allwords) * 100:.1f}% unique words")
