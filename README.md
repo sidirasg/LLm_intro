@@ -92,3 +92,35 @@ Finding the optimal tokenization strategy is difficult:
 - Embeddings are dense representations of tokens
 - Both tokenization and embeddings are learned from data
 - There are many valid ways to create these schemes
+
+- This is an excellent overview of tokenization and embeddings! You've covered the fundamental concepts clearly. Let me add a few insights that might complement your notes:
+
+## Additional Context on Tokenization Methods
+
+**Byte-Pair Encoding (BPE)** is one of the most common tokenization algorithms used today (GPT models, for instance). It starts with characters and iteratively merges the most frequent pairs to create subword tokens. This helps balance vocabulary size with semantic meaningfulness.
+
+**WordPiece** (used by BERT) and **SentencePiece** (used by T5, LLaMA) are other popular approaches that achieve similar goals through slightly different algorithms.
+
+## The Embedding Space
+
+Your point about embeddings capturing semantic relations is crucial. In practice, this means:
+- Similar words cluster together in the embedding space
+- Vector arithmetic can capture relationships (the classic example: `king - man + woman ≈ queen`)
+- Contextualized embeddings (from transformers) can represent the same word differently based on surrounding context
+
+## Practical Trade-offs
+
+The tokenization choice significantly impacts:
+- **Computational efficiency**: Fewer tokens = faster processing
+- **Multilingual capability**: Byte-level tokenization handles any language but needs more tokens
+- **Out-of-vocabulary handling**: Subword tokenization can handle novel words by breaking them into known pieces
+
+## A Concrete Example
+
+For the sentence "The tokenization is interesting":
+- **Character-level**: ~30 tokens (including spaces)
+- **Subword (BPE)**: ~6-8 tokens (might split "tokenization" into "token" + "ization")
+- **Word-level**: 4 tokens
+
+Each approach affects how much context fits in the model's window and how well it generalizes.
+
